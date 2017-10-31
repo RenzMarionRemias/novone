@@ -14,3 +14,7 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+//Renz's Routes
+Route::view('/', '/home/index');
+//End
