@@ -1,0 +1,78 @@
+body {
+	
+}
+
+.navbar {
+	background-color: #2c3e50;
+	border: none;
+	padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.navbar-nav > li > a {
+	font-family: 'Raleway', sans-serif;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	color: #ffffff !important;
+}
+
+.navbar-brand {
+	font-family: 'Anton', sans-serif;
+	font-size: 25px;
+	color: #ffffff !important;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+}
+
+.navbar-collapse {
+	border-top: 1px solid #2c3e50 !important;
+	-webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.icon-bar {
+	background-color: #ffffff !important;
+}
+
+.home-banner {
+	background: url(/assets/img/cover-2.jpg) no-repeat center center fixed; 
+	-webkit-background-size: cover;
+	-moz-background-size: cover;
+	-o-background-size: cover;
+	background-size: cover;
+}
+
+.trademark {
+	padding-top: 250px;
+    padding-bottom: 250px;
+}
+
+.company-name > h1 {
+	font-family: 'Anton', sans-serif;
+	font-size: 70px;
+	color: #ffffff;
+	text-transform: uppercase;
+	letter-spacing: 5px;
+}
+
+.company-motto > p {
+	font-family: 'Raleway', sans-serif;
+	font-size: 30px;
+	color: #ffffff;
+}
+
+
+/*MEDIA QUERIES*/
+
+@media screen and (max-width: 331px) {
+	.company-name > h1 {
+		font-size: 65px;
+	}
+
+	.company-motto > p {
+		font-size: 25px;
+	}
+}
+
+/*END OF MEDIA QUERIES*/
