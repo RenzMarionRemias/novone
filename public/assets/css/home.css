@@ -36,7 +36,7 @@ body {
 }
 
 .home-banner {
-	background: url(/assets/img/cover-2.jpg) no-repeat center center fixed; 
+	background: url(/novone/public/assets/img/cover-2.jpg) no-repeat center center fixed; 
 	-webkit-background-size: cover;
 	-moz-background-size: cover;
 	-o-background-size: cover;

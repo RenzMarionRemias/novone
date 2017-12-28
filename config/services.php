@@ -35,4 +35,15 @@ return [
         'secret' => env('STRIPE_SECRET'),
     ],
 
+    'paypal' => [
+        'client_id' => env('PAYPAL_CLIENT_ID'),
+        'client_secret' => env('PAYPAL_CLIENT_SECRET'),
+        'mode' => env('PAYPAL_MODE'), // default is sandbox
+        // 'log' => [
+        //     'enabled' => true // default is false
+        //     'file' => 'paypal.log' // default is laravel.log
+        //     'level' => 'DEBUG' // default is DEBUG
+        // ],
+    ],
+
 ];

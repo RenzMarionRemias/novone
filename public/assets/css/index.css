@@ -1,0 +1,302 @@
+body {
+	font-family: 'Raleway', sans-serif;
+	width: 100%;
+    height: 100%;
+    margin: 0px;
+    padding: 0px;
+    overflow-x: hidden; 
+    overflow-x: hidden;
+}
+
+.navbar-default {
+	background-color: #FFFFFF;
+	padding-top: 10px ;
+    padding-bottom: 10px ;
+	border-radius: 0px;
+}
+
+.icon-bar {
+	background-color: #000000 !important;
+}
+
+.navbar-brand {
+	font-weight: bold;
+	font-size: 25px;
+	color: #fd1c15 !important;
+	text-transform: uppercase;
+}
+
+#myNavbar {
+	border: none;
+}
+
+.nav > li > a {
+	font-size: 15px;
+	color: #000000 !important;
+}
+
+.nav > li > a:hover {
+	
+}
+
+.home-section {
+	background: url(/assets/img/home-banner.jpeg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+}
+
+.home-content {
+	padding-top: 230px;
+    padding-bottom: 205px;
+}
+
+.company-name > h1 {
+	font-size: 80px;
+	font-weight: bold;
+	color: #FFFFFF;
+	text-transform: uppercase;
+}
+
+.company-desc {
+	margin-top: -9px;
+}
+
+.company-desc > p {
+	font-size: 22px;
+	color: #FFFFFF;
+}
+
+.line-1 {
+	max-width: 70px;
+	margin: 0 auto;
+	margin-top: -5px;
+}
+
+.line-1 > hr {
+	border-bottom: 1px solid #ffffff;
+}
+
+.get-started > button {
+	background-color: #fd1c15;
+	border: 1px solid #fd1c15;
+	border-radius: 0px;
+	text-transform: uppercase;
+}
+
+.services-section {
+	padding-top: 50px; 
+	padding-bottom: 50px;
+}
+
+.services-offered {
+	padding-top: 10px;
+}
+
+.services-title > p {
+	font-size: 30px;
+	font-weight: bold;
+	color: #fd1c15;
+	text-transform: uppercase;
+}
+
+.first-service {
+	background-color: #fd1c15;
+}
+
+.first-service-content {
+	padding-top: 80px;
+	padding-bottom: 80px;
+}
+
+.second-service {
+	background-color: #000000;
+}
+
+.second-service-content {
+	padding-top: 80px;
+	padding-bottom: 80px;
+}
+
+.third-service {
+	background-color: #fd1c15;
+}
+
+.third-service-content {
+	padding-top: 80px;
+	padding-bottom: 80px;
+}
+
+.service-icon > i {
+	font-size: 75px;
+	color: #FFFFFF;
+}
+
+.service-title > p {
+	font-size: 25px;
+	color: #ffffff;
+	padding-top: 60px;
+	padding-bottom: 30px;
+	text-transform: uppercase;
+}
+
+.service-desc {
+	font-size: 18px;
+	color: #ffffff;
+	padding-left: 20px;
+	padding-right: 20px;
+}
+
+#manufactureIcon, #deliverIcon, #assistIcon {
+	opacity: 0;
+}
+
+.about-section {
+	padding-bottom: 50px;
+}
+
+.about-title > p {
+	font-size: 30px;
+	font-weight: bold;
+	color: #fd1c15;
+	text-transform: uppercase;
+}
+
+.about-novone {
+	padding-top: 10px;
+}
+
+.about-novone-content {
+	background: url(/novone/public/assets/img/about-banner.jpg) no-repeat center center fixed; 
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+	/*background-color: #000000;*/
+	padding-top: 122px;
+	padding-bottom: 122px;
+}
+
+.novone-name > p {
+	font-size: 25px;
+	color: #ffffff;
+}
+
+.novone-name > p > .company-name {
+	color: #fd1c15;
+}
+
+.line-2 {
+	max-width: 70px;
+	margin: 0 auto;
+}
+
+.line-2 > hr {
+	border: 1px solid #fd1c15;
+}
+
+.novone-background {
+	max-width: 700px;
+	margin: 0 auto;
+}
+
+.novone-background > p {
+	font-size: 18px;
+	color: #ffffff;
+}
+
+.contact-section {
+	padding-bottom: 50px;
+}
+
+.contact-form-content {
+	
+}
+
+.contact-title > p {
+	font-size: 30px;
+	font-weight: bold;
+	color: #fd1c15;
+	text-transform: uppercase;
+}
+
+.contact-form {
+	padding-top: 10px;
+}
+
+.contact-form-label {
+	font-size: 18px; 
+	font-weight: normal;
+}
+
+.contact-form-input {
+	border-radius: 0px;
+}
+
+#messageTxtArea {
+	height: 318px;
+    resize: none;
+}
+
+.contact-button {
+	padding-top: 25px;
+}
+
+.contact-button > .btn-danger {
+	background-color: #fd1c15;
+	text-transform: uppercase;
+	border-radius: 0px;
+}
+
+.first-footer {
+	background-color: #000000;
+}
+
+.first-footer-content {
+	padding-top: 80px;
+	padding-bottom: 80px;
+}
+
+.first-footer-title {
+	font-size: 18px;
+	font-weight: bold;
+	color: #ffffff;
+	text-transform: uppercase;
+}
+
+.quick-contact-content {
+	font-size: 16px;
+	color: #ffffff;
+}
+
+.social-media-btn {
+	background-color: transparent;
+	color: #ffffff;
+	border-radius: 100%;
+}
+
+.email-input {
+	border-radius: 0px;
+}
+
+.submit-btn {
+	background-color: transparent;
+	color: #ffffff;
+	text-transform: uppercase;
+	border-radius: 0px;
+}
+
+.second-footer {
+	background-color: #fd1c15;
+}
+
+.second-footer-content {
+	padding-top: 22px;
+	padding-bottom: 9px;
+}
+
+.novone-copyright {
+	color: #ffffff;
+	font-size: 16px;
+}
