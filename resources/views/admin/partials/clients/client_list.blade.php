@@ -3,10 +3,10 @@
 
 
 <div class='col-xs-12 col-sm-10 col-md-10 pull-right' style='padding-left:100px;'>
-    <h1>Clients</h1>
+    <h1>Customer</h1>
     @if(Session::has('success'))
     <div class="alert alert-success">
-        Client has been approved successfully! @php Session::forget('success'); @endphp
+        Customer has been approved successfully! @php Session::forget('success'); @endphp
     </div>
     @endif
 
@@ -32,6 +32,7 @@
                         <th>Email</th>
                         <th>Fullname</th>
                         <th>Status</th>
+                        <th>Account Type</th>
                         <th>Gender</th>
                         <th>Birthdate</th>
                         <th>Contact No.</th>
@@ -44,16 +45,23 @@
                         <td>{{$client['email']}}</td>
                         <td>{{$client['lastname']}} {{$client['firstname']}} {{$client['middlename']}}</td>
                         <td>@if($client['client_status'] == 0)Pending @else Approved @endif</td>
+                        <td>{{$client['client_type']}}</td>
                         <td>{{$client['gender']}}</td>
                         <td>{{$client['birthdate']}}</td>
                         <th>{{$client['contact_no']}}</th>
                         <td>
-                            <a class="btn btn-info btn-sm btn-client-information" data-toggle="modal" data-target="#clientInformation" data-id="{{$client['client_id']}}"
+                        <a class="btn btn-info btn-sm btn-client-information" data-toggle="modal" data-target="#clientInformation" data-id="{{$client['client_id']}}"
                                 data-clientstatus="{{$client['client_status']}}" data-email="{{$client['email']}}" data-lastname="{{$client['lastname']}}"
                                 data-firstname="{{$client['firstname']}}" data-middlename="{{$client['middlename']}}" data-gender="{{$client['gender']}}"
                                 data-birthdate="{{$client['birthdate']}}" data-contact="{{$client['contact_no']}}" data-businessname="{{$client['business_name']}}"
-                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}">View Full Details</a>
-                        </td>
+                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}" data-clienttype="{{$client['client_type']}}">View Full Details</a>
+                                @if($client['client_type'] == 'NEW')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=old">Set as old type</a>
+                                @endif
+                                @if($client['client_type'] == 'OLD')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=new">Set as new type</a>
+                                @endif
+                            </td>
                     </tr>
                     @endif @endforeach
 
@@ -67,6 +75,7 @@
                         <th>Email</th>
                         <th>Fullname</th>
                         <th>Status</th>
+                        <th>Account Type</th>
                         <th>Gender</th>
                         <th>Birthdate</th>
                         <th>Contact No.</th>
@@ -79,16 +88,22 @@
                         <td>{{$client['email']}}</td>
                         <td>{{$client['lastname']}} {{$client['firstname']}} {{$client['middlename']}}</td>
                         <td>@if($client['client_status'] == 0)Pending @else Approved @endif</td>
+                        <td>{{$client['client_type']}}</td>
                         <td>{{$client['gender']}}</td>
                         <td>{{$client['birthdate']}}</td>
                         <th>{{$client['contact_no']}}</th>
                         <td>
-                            <a class="btn btn-info btn-sm btn-client-information" data-toggle="modal" data-target="#clientInformation" data-id="{{$client['client_id']}}"
+                        <a class="btn btn-info btn-sm btn-client-information" data-toggle="modal" data-target="#clientInformation" data-id="{{$client['client_id']}}"
                                 data-clientstatus="{{$client['client_status']}}" data-email="{{$client['email']}}" data-lastname="{{$client['lastname']}}"
                                 data-firstname="{{$client['firstname']}}" data-middlename="{{$client['middlename']}}" data-gender="{{$client['gender']}}"
                                 data-birthdate="{{$client['birthdate']}}" data-contact="{{$client['contact_no']}}" data-businessname="{{$client['business_name']}}"
-                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}">View Full Details</a>
-
+                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}" data-clienttype="{{$client['client_type']}}">View Full Details</a>
+                                @if($client['client_type'] == 'NEW')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=old">Set as old type</a>
+                                @endif
+                                @if($client['client_type'] == 'OLD')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=new">Set as new type</a>
+                                @endif
                         </td>
                     </tr>
                     @endif @endforeach
@@ -98,12 +113,13 @@
         </div>
 
         <div id="inactiveAccounts" class="tab-pane fade">
-            <table class="table">
+            <table class="table list-data">
                 <thead>
                     <tr>
                         <th>Email</th>
                         <th>Fullname</th>
                         <th>Status</th>
+                        <th>ACcount Type</th>
                         <th>Gender</th>
                         <th>Birthdate</th>
                         <th>Contact No.</th>
@@ -116,6 +132,7 @@
                         <td>{{$client['email']}}</td>
                         <td>{{$client['lastname']}} {{$client['firstname']}} {{$client['middlename']}}</td>
                         <td>@if($client['client_status'] == 0)Pending @else Approved @endif</td>
+                        <td>{{$client['client_type']}}</td>
                         <td>{{$client['gender']}}</td>
                         <td>{{$client['birthdate']}}</td>
                         <th>{{$client['contact_no']}}</th>
@@ -124,7 +141,13 @@
                                 data-clientstatus="{{$client['client_status']}}" data-email="{{$client['email']}}" data-lastname="{{$client['lastname']}}"
                                 data-firstname="{{$client['firstname']}}" data-middlename="{{$client['middlename']}}" data-gender="{{$client['gender']}}"
                                 data-birthdate="{{$client['birthdate']}}" data-contact="{{$client['contact_no']}}" data-businessname="{{$client['business_name']}}"
-                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}">View Full Details</a>
+                                data-businessaddress="{{$client['business_address']}}" data-businesscontact="{{$client['business_contact']}}" data-clienttype="{{$client['client_type']}}">View Full Details</a>
+                                @if($client['client_type'] == 'NEW')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=old">Set as old type</a>
+                                @endif
+                                @if($client['client_type'] == 'OLD')
+                                <a class="btn btn-info btn-sm" href="/novone/public/admin/client/update/type/{{$client['client_id']}}?type=new">Set as new type</a>
+                                @endif
                         </td>
                     </tr>
                     @endif @endforeach
@@ -154,36 +177,41 @@
                     <input type='hidden' name='clientId' id='hiddenClientId'>
                     <div class="form-group">
                         <label>Email: </label>
-                        <label id="clientEmail"></label>
+                        <span id="clientEmail"></span>
                     </div>
                     <div class="form-group">
                         <label>Fullname: </label>
-                        <label id="clientFullName"></label>
+                        <span id="clientFullName"></span>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Account Type: </label>
+                        <span id="clientAccountType"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Gender: </label>
-                        <label id="clientGender"></label>
+                        <span id="clientGender"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Birthdate: </label>
-                        <label id="clientBirthdate"></label>
+                        <span id="clientBirthdate" style="font-weight:none !important;"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Business Name: </label>
-                        <label id="clientBusinessName"></label>
+                        <span id="clientBusinessName"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Business Address: </label>
-                        <label id="clientBusinessAddress"></label>
+                        <span id="clientBusinessAddress"></span>
                     </div>
 
                     <div class="form-group">
                         <label>Business Contact No: </label>
-                        <label id="clientBusinessContact"></label>
+                        <span id="clientBusinessContact"></span>
                     </div>
 
                 </div>

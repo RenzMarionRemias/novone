@@ -41,7 +41,7 @@
 
 							<div class="form-group col-lg-4">
 								<label>Middlename</label>
-								<input type="text" required name="middlename" class="form-control" id="" value="">
+								<input type="text" name="middlename" class="form-control" id="" value="">
 							</div>
 
 							<div class="form-group col-lg-6">
@@ -65,7 +65,6 @@
 								<label>Client Photo</label>
 								<input type="file" required name="client_photo" class="dropify" />
 							</div>
-
 						</div>
 
 						<div class="col-md-12">
@@ -85,6 +84,13 @@
 								<label>Business Contact</label>
 								<input type="text" required name="business_contact" class="form-control" id="" value="">
 							</div>
+
+							
+							<div class="form-group col-lg-12">
+								<label>Valid ID</label>
+								<input type="file" required name="client_valid_id" class="dropify" />
+							</div>
+
 
 						</div>
 

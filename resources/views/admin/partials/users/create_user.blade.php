@@ -78,10 +78,12 @@
       <!-- Password -->
       <label class="control-label"  for="password_confirm">Account Type</label>
       <div class="controls">
-        <select class='form-control' name='account_type'>
-          <option value='admin'>Admin</option>
-          <option value='billing'>Billing</option>
-          <option value='sales'>Sales</option>
+        <select class='form-control' name='account_type' required>
+          @foreach($accountType as $type)
+            <option value="{{$type['account_type_name']}}">
+              {{$type['account_type_name']}}
+            </option>
+          @endforeach
         </select>
       </div>
     </div>

@@ -218,3 +218,7 @@ h5 {
     background: #090;
     border-image: initial;
 }
+
+.wizard > .content {
+    background:white !important;
+}

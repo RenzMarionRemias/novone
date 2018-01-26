@@ -10,7 +10,7 @@
     </div>
     @endif
 
-  <table class="table">
+  <table class="table list-data">
     <thead>
       <tr>
       <th>Email</th>
@@ -98,9 +98,9 @@
           <div class="form-group">
             <label for="exampleInputEmail1">Account Type</label>
             <select class='form-control' id='editAccountType' name='account_type'>
-              <option value='admin'>Admin</option>
-              <option value='billing'>Billing</option>
-              <option value='sales'>Sales</option>
+              @foreach($accountType as $type) 
+                <option value='{{$type["account_type_name"]}}'>{{$type['account_type_name']}}</option>
+              @endforeach
             </select>
           </div>
         </div>

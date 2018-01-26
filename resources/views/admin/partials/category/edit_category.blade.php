@@ -8,8 +8,9 @@
     </div>
     @endif
     <h2>Product Categories</h2>
-    <a href='#' class='btn btn-primary pull-right' data-toggle="modal" data-target="#addCategoryModal">Add Category</a>
-    <table class="table">
+    <a href='#' class='btn btn-primary pull-right' style="margin-top:24px;margin-bottom:24px;" data-toggle="modal" data-target="#addCategoryModal">Add Category</a>
+    <br/>
+    <table class="table list-data">
         <thead>
             <tr>
                 <th>Category Name</th>

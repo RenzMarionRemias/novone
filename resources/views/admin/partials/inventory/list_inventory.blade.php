@@ -9,31 +9,42 @@
         Product has been updated successfully! @php Session::forget('success'); @endphp
     </div>
     @endif
-    <h1>Inventories</h1>
-    <table class="table">
+
+    @if(Session::has('quantityError'))
+    <div class="alert alert-danger">
+        Input quantity must not exceeded product's quantity ! @php Session::forget('quantityError'); @endphp
+    </div>
+    @endif
+  <!-- <h1>Inventories</h1>-->
+    <table class="table list-data">
         <thead>
             <tr>
                 <th>Product Code</th>
                 <th>Product Name</th>
-                <th>Quantity</th>
-                <th>Price</th>
+                <th>No. of Bundle</th>
+                <th>Pcs per Bundle</th>
+                <th>Price Per Bundle</th>
+                <th>Price Per Item</th>
                 <th>Critical Level</th>
                 <th>Action</th>
             </tr>
         </thead>
         <tbody>
             @foreach($inventories as $inventory)
-            <tr>
+
+            <tr  @if($inventory->critical_level >= $inventory->quantity) style="background-color:#ff5465;" @endif
+                 @if(($inventory->critical_level + 20) >= $inventory->quantity ) style="background-color:yellow;" @endif>
                 <td>{{$inventory->product_code}}</td>
                 <td>{{$inventory->product_name}}</td>
                 <td>{{$inventory->quantity}}</td>
+                <td>{{$inventory->pcs_per_bundle}}</td>
                 <td>{{$inventory->price}}</td>
-                <th>{{$inventory->critical}}</th>
+                <td>{{$inventory->price_per_item}}</td>
+                <th>{{$inventory->critical_level}}</th>
                 <td>
                     <a class="btn btn-primary btn-sm btn-edit-quantity" data-toggle="modal" data-target="#inventoryQuantityModal" data-productcode="{{$inventory->product_code}}"
-                        data-quantity="{{$inventory->quantity}}" data-productname="{{$inventory->product_name}}">Update Quantity</a>
-                    <a class="btn btn-danger btn-sm btn-edit-critical" data-toggle="modal" data-target="#inventoryCriticalModal" data-productcode="{{$inventory->product_code}}"
-                        data-critical="{{$inventory->critical}}" data-productname="{{$inventory->product_name}}">Set Critical Level</a>
+                        data-quantity="{{$inventory->quantity}}" data-productname="{{$inventory->product_name}}">Add Stocks</a>
+                 
                 </td>
             </tr>
             @endforeach
@@ -45,6 +56,7 @@
 
 
 <!-- MODAL HERE -->
+<!--
 <div class="modal fade" id="inventoryCriticalModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -57,8 +69,6 @@
             </div>
             <form action='/novone/public/admin/inventory/update/critical' method='post'>
                 <div class="modal-body">
-
-                    <!-- content goes here -->
                     {{ csrf_field() }}
 
                     <div class="form-group">
@@ -98,7 +108,7 @@
         </div>
     </div>
 </div>
-
+-->
 <!-- QUANTITY MODAL -->
 
 <div class="modal fade" id="inventoryQuantityModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
@@ -132,7 +142,14 @@
                         </div>
                         <input type='hidden' class='hiddenProductCode' name='product_code' />
                         <div class="form-group">
-                            <label>Quantity</label>
+                            <label>Add Stocks to</label>
+                            <select class="form-control" name="add_type">
+                                <option value="INVENTORY">INVENTORY</option>
+                                <option value="STORE">STORE</option>
+                            </select>   
+                        </div>
+                        <div class="form-group">
+                            <label>Bundle</label>
                             <input type="text" class="form-control" required id='editProductQuantity' name="quantity">
                         </div>
                     </div>
@@ -154,3 +171,4 @@
             </div>
         </div>
     </div>
+

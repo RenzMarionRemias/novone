@@ -6,11 +6,12 @@
 
     
     @if($errors)
-    <div class="alert alert-danger">
+    
     @foreach ($errors->all() as $error)
+    <div class="alert alert-danger">
     {{ $error }}
+     </div>
     @endforeach
-    </div>
     @endif
     
   <form class="form-inline"  action='/novone/public/admin/user/update/password' method="POST">
@@ -22,21 +23,21 @@
     <div class="control-group">
       <label class="control-label"  for="old_password">Old Password</label>
       <div class="controls">
-        <input type="text" id="old_password" name="old_password" placeholder="" class="input-xlarge">
+        <input type="text" id="old_password" name="old_password" placeholder="" class="form-control input-xlarge">
       </div>
     </div>
 
     <div class="control-group">
     <label class="control-label"  for="new_password">New Password</label>
     <div class="controls">
-      <input type="text" id="new_password" name="new_password" placeholder="" class="input-xlarge">
+      <input type="text" id="new_password" name="new_password" placeholder="" class="form-control input-xlarge">
     </div>
   </div>
 
   <div class="control-group">
       <label class="control-label"  for="repeat_new_password">Repeat New Password</label>
       <div class="controls">
-        <input type="text" id="repeat_new_password" name="repeat_new_password" placeholder="" class="input-xlarge">
+        <input type="text" id="repeat_new_password" name="repeat_new_password" placeholder="" class="form-control input-xlarge">
       </div>
     </div>
 

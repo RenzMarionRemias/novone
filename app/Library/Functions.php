@@ -19,14 +19,19 @@ class Functions {
         
         $session = [];
 
-        $session['id'] = $type == 'CLIENT' ? $user->client_id : $user->id;
-        $session['email'] = $user->email;
-        $session['lastname'] = $user->lastname;
-        $session['firstname'] = $user->firstname;
-        $session['client_photo'] = $user->client_photo;
-        $session['gender'] = $user->gender;
-        $session['birthdate'] = $user->birthdate;
+        $session['id']               = $type == 'CLIENT' ? $user->client_id : $user->id;
+        $session['email']            = $user->email;
+        $session['lastname']         = $user->lastname;
+        $session['firstname']        = $user->firstname;
+        $session['middlename']       = $user->middlename;
+        $session['client_photo']     = $user->client_photo;
+        $session['client_type']      = $user->client_type;
+        $session['gender']           = $user->gender;
+        $session['birthdate']        = $user->birthdate;
+        $session['contact_no']       = $user->contact_no;
+        $session['business_name']    = $user->business_address;
         $session['business_address'] = $user->business_address;
+        $session['business_contact'] = $user->business_contact;
 
         return $session;
     }

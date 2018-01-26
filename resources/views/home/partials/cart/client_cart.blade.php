@@ -2,7 +2,7 @@
 
 
 <!-- ******************************************* -->
-<div class="container">
+<div class="container" >
 
     <div class='col-xs-12 col-sm-12 col-md-12' style='margin-top:120px;'>
 
@@ -18,14 +18,15 @@
             </li>
         </ul>
 
-        <div class="tab-content">
-            <div id="shoppingCart" class="tab-pane fade in active">
+        <div class="tab-content"   style="background-color:white !important;">
+            <div id="shoppingCart" class="tab-pane fade in active"  style="background-color:white !important; padding-top:42px;min-height:400px;">
+                @if($products)
                 <form action="/novone/public/cart/payment" method="POST">
-                    <div id="example-basic" style="">
+                    <div id="example-basic"  style="background-color:white !important;">
                         <h3>Orders</h3>
-                        <section>
+                        <section  style="background-color:white !important;">
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-
+                          
                             <table id="cart" class="table table-hover table-condensed">
                                 <thead>
                                     <tr>
@@ -37,6 +38,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach($products as $product)
+                                    @if($product->cart_status == 'PENDING')
                                     <tr>
                                         <td data-th="Product Name">
                                             <div class="row">
@@ -55,16 +57,19 @@
                                             <input type="number" name="quantity" class="form-control text-center cart-product-price" value="1" min="1">
                                             <input type="hidden" id="{{$product->product_code}}" class="" value="{{$product->price}}"/>
                                         </td>
-                                  
+
                                         <td class="actions" data-th="">
+                                        <!--
                                             <button class="btn btn-info btn-sm">
                                                 <i class="fa fa-refresh"></i>
                                             </button>
+                                            -->
                                             <a class="btn btn-danger btn-sm" href="/novone/public/cart/delete/{{$product->cart_id}}">
                                                 <i class="fa fa-trash-o"></i>
                                             </a>
                                         </td>
                                     </tr>
+                                    @endif
 
                                     @endforeach
                                 </tbody>
@@ -76,21 +81,26 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <a href="#" class="btn btn-warning">
-                                                <i class="fa fa-angle-left"></i> Continue Shopping</a>
+
                                         </td>
+                                        <!--
                                         <td colspan="2" class="hidden-xs text-center">
 
                                         </td>
-                                        <td colspan="2">
+                                        -->
+
+                                        <td colspan="5">
+                                        
                                             <div class="form-group">
                                                 <label for="sName">Payment Method</label>
                                                 <select class="form-control" id="paymentMethod" name="payment_method">
-                                                    <option value="CASH">CASH ON DELIVERY</option>
-                                                    <option value="CHEQUE">CHEQUE</option>
+                                                    @if(session()->get('currentClient')['client_type'] == 'OLD'))
+                                                        <option value="CASH">CASH ON DELIVERY</option>
+                                                    @endif
                                                     <option value="PAYPAL">PAYPAL</option>
                                                 </select>
                                             </div>
+
                                         </td>
 
                                         <!--
@@ -103,46 +113,48 @@
                                 </tfoot>
                             </table>
 
+
+
                         </section>
                         <h3>Order Summary</h3>
                         <section style="overflow-y:scroll !important;">
                             <div class="row">
                                 <div class="col-xs-12">
                                     <div class="invoice-title">
+                                    <!--
                                         <h2>Invoice</h2>
                                         <h3 class="pull-right">Order # 12345</h3>
+                                    -->
                                     </div>
                                     <hr>
                                     <div class="row">
                                         <div class="col-xs-6">
                                             <address>
                                                 <strong>Billed To:</strong>
-                                                <br> John Smith
-                                                <br> 1234 Main
-                                                <br> Apt. 4B
-                                                <br> Springfield, ST 54321
+                                                <br>  {{ucfirst(session()->get('currentClient')['firstname'])}}  {{ucfirst(session()->get('currentClient')['lastname'])}}
+                                                <br>  {{ucfirst(session()->get('currentClient')['business_address'])}}
                                             </address>
                                         </div>
+                                        
                                         <div class="col-xs-6 text-right">
                                             <address>
-                                                <strong>Shipped To:</strong>
-                                                <br> {{ucfirst(session()->get('currentClient')['firstname'])}} {{ucfirst(session()->get('currentClient')['lastname'])}}
-                                                <br> {{ucfirst(session()->get('currentClient')['business_address'])}}
+                                                <strong>Payment Method:</strong>
+                                                <br> <span id="paymentMethodLabel">CASH ON DELIVERY</span>
                                             </address>
                                         </div>
+                                        
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-6">
                                             <address>
                                                 <strong>Payment Method:</strong>
                                                 <br> <span id="paymentMethodLabel">CASH ON DELIVERY</span>
-                                                <br> jsmith@email.com
                                             </address>
                                         </div>
                                         <div class="col-xs-6 text-right">
                                             <address>
                                                 <strong>Order Date:</strong>
-                                                <br> March 7, 2014
+                                                <br> {{$currentDate}}
                                                 <br>
                                                 <br>
                                             </address>
@@ -223,19 +235,33 @@
                         </section>
                     </div>
                 </form>
+                @else
+                                <h2 align="center">No Product in Cart!</h2>
+                            @endif
 
             </div>
             <div id="orderStatus" class="tab-pane fade in">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Invoice Id</th>
+                            <th>Transaction ID</th>
                             <th>Ordered Date</th>
                             <th>Payment Type</th>
                             <th>Delivery Status</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
+
+                        @foreach($orderedProducts as $order) 
+                            <tr>
+                                <td>{{$order->transaction_id}}</td>
+                                <td>{{$order->created_at}}</td>
+                                <td>{{$order->payment_type}}</td>
+                                <td>{{$order->delivery_status}}</td>
+                                <td><a href="/novone/public/order/details/{{$order->invoice_id}}" class="btn btn-primary">View Order Details</a></td>
+                            </tr>
+                        @endforeach
                     </tbody>
                 </table>
 

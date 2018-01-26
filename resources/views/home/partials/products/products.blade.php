@@ -1,6 +1,6 @@
 @include('home.index')
 
-<div class="wrap" style="margin-top:82px;">
+<div class="wrap" style="margin-top:82px; background-color:white !important;">
     <div class="menu">
         <div class="mini-menu">
             <ul>
@@ -44,18 +44,20 @@
             </ul>
         </div>
         -->
+        <!--
         <div class="menu-price menu-item">
             <div class="header-item">Price</div>
             <p>
-                <!--<label for="amount">Price range:</label>-->
+                <label for="amount">Price range:</label>
                 <input type="text" readonly id="amount" style="border:0; color:#f6931f; font-weight:bold;">
             </p>
             <div id="slider-range"></div>
         </div>
+        -->
 
     </div>
 
-    <div class="items">
+    <div class="items" style="background-color:white;">
 
 
         @if(Session::has('success'))
@@ -64,7 +66,7 @@
         </div>
         @endif
 
-        <div class="items">
+        <div class="items" style="background-color:white;">
             @foreach($products as $product)
             <div data-price="{{$product->price}}" class="item">
                 <img src="/novone/storage/app/{{$product->image}}" alt="jacket" class="img-item" style="object-fit: cover;" />
@@ -79,7 +81,7 @@
             </div>
             @endforeach
         </div>
-        <button class="loadmore">Load More</button>
+        
     </div>
 </div>
 
@@ -136,9 +138,11 @@
                             <div class="btn-group" role="group">
                                 <button type="button" class="btn btn-default" data-dismiss="modal" role="button">Close</button>
                             </div>
+                            @if(Session::has('currentClient'))
                             <div class="btn-group" role="group">
                                 <button type="submit" class="btn btn-primary btn-hover-green" data-action="save" role="button">Add to cart</button>
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>

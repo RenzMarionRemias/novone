@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
+
+use App\Mail\AccountVerification;
 
 use App\Category;
 use App\Inventory;
 use App\Product;
 use App\ProductPullIn;
+use App\Store;
 use App\User;
 use DB;
 use Storage;
@@ -24,24 +28,76 @@ class InventoryController extends Controller {
     }
 
     public function getProduct($productCode){
-        return Inventory::where('product_code','=',$productCode)->first();
+
+         return DB::table('inventories')
+        ->leftJoin('products', 'inventories.product_code', '=', 'products.product_code')
+        ->where('products.product_code',$productCode)
+        ->select('inventories.*','products.pcs_per_bundle')
+        ->get()->first();
     }
 
     public function updateQuantity(Request $request){
 
+        $productCode = $request->product_code;
+        $addType     = $request->add_type;
+        
         $request->validate([
             'quantity'      => 'required|numeric',
         ]);
-
+        
         $products = $this->getProduct($productCode);
+
         if($products){
-
-            Inventory::where('product_code', $request->product_code)
-                ->update(['quantity' => $request->quantity+$products->quantity
-            ]);
+        
+                if($addType == 'INVENTORY'){
+                    Inventory::where('product_code', $productCode)
+                        ->update(['quantity' => $request->quantity+$products->quantity
+                    ]);
             
-            $this->triggerPullIn($request->product_code,$request->quantity);
+                    $this->triggerPullIn($request->product_code,$request->quantity,$addType);
+                }
+                else if($addType == 'STORE'){
+                    if($request->quantity <= $products->quantity){
 
+                        $storeProduct = Store::where('product_code','=',$productCode)->first();
+
+                        if($storeProduct){
+
+                            $totalBundle = $request->quantity  + $storeProduct->pcs_per_bundle;
+                            Store::where('product_code', $productCode)
+                                ->update([
+                                    'pcs_per_bundle' => $totalBundle,
+                                    'total_quantity' => $totalBundle * $products->pcs_per_bundle
+                            ]);
+            
+                        }
+                        else{
+
+                            $store = new Store;
+
+                            $store->product_code = $request->product_code;
+            
+                            $store->pcs_per_bundle = $request->quantity;
+                    
+                            $store->total_quantity = $request->quantity * $products->pcs_per_bundle;
+
+                            $store->user_id = session()->get('currentUser')->id;
+            
+                            $store->save();
+                        }
+
+                        Inventory::where('product_code', $request->product_code)
+                            ->update(['quantity' => $products->quantity -  $request->quantity
+                        ]);
+
+                        $this->triggerPullIn($request->product_code,$request->quantity,$addType);
+                    }
+                    else{
+                        return redirect()->back()->with('quantityError',true);
+                    }
+ 
+            }
+        
             return redirect()->back()->with('success',true);
         }
         else{
@@ -56,7 +112,7 @@ class InventoryController extends Controller {
             
             $inventory->save();
 
-            $this->triggerPullIn($request->product_code,$request->quantity);
+            $this->triggerPullIn($request->product_code,$request->quantity,'INVENTORY');
             
             return redirect()->back()->with('success',true);
         }
@@ -74,7 +130,7 @@ class InventoryController extends Controller {
         ]);
     }
 
-
+/*
 
     public function updateCriticalValue(Request $request) {
         $request->validate([
@@ -93,6 +149,7 @@ class InventoryController extends Controller {
         return redirect()->back()->with('error',true);
     }
 
+*/
     public function showInventory(){
 
         /*
@@ -102,6 +159,8 @@ class InventoryController extends Controller {
         */
         $inventories = DB::table('inventories')
         ->leftJoin('products', 'inventories.product_code', '=', 'products.product_code')
+        ->select('inventories.*','products.product_name','products.critical_level','products.price',
+            'products.price_per_item','products.pcs_per_bundle')
         ->get()
         ->toArray();
 
@@ -116,11 +175,13 @@ class InventoryController extends Controller {
     // PULL IN //
 
     
-    public function triggerPullIn($productCode,$quantity){
+    public function triggerPullIn($productCode,$quantity,$type){
         
         $productPullIn = new ProductPullIn;
         
         $productPullIn->product_code = $productCode;
+
+        $productPullIn->pull_in_type = $type;
         
         $productPullIn->quantity = $quantity;
 
@@ -130,9 +191,32 @@ class InventoryController extends Controller {
     }
 
     public function showPullInProducts(){
-        $products = ProductPullIn::all()->toArray();
+     
+
+        $products = DB::table('product_pull_ins')
+                    ->leftJoin('products', 'product_pull_ins.product_code', '=', 'products.product_code')
+                    ->leftJoin('users', 'users.id', '=', 'product_pull_ins.user_id')
+                    ->select('product_pull_ins.*','products.product_name','users.email')
+                    ->orderBy('product_pull_ins.product_pull_in_id','desc')
+                    ->get();
 
         return view('admin.partials.inventory.pull_in_inventory',[
+                    'products' => $products
+        ]);
+    }
+
+
+        public function showPullOutProducts(){
+     
+
+        $products = DB::table('product_pull_outs')
+                    ->leftJoin('products', 'product_pull_outs.product_code', '=', 'products.product_code')
+                    ->leftJoin('users', 'users.id', '=', 'product_pull_outs.user_id')
+                    ->select('product_pull_outs.*','products.product_name','users.email')
+                    ->orderBy('created_at','desc')
+                    ->get();
+
+        return view('admin.partials.inventory.pull_out_inventory',[
                     'products' => $products
         ]);
     }

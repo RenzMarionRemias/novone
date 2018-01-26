@@ -113,6 +113,7 @@
     $('.btn-show-product-information').on('click', function () {
 
         var currentCode = $(this).data('productcode');
+
         $('#productCode').val(currentCode)
         $('#clientProductCode').text($(this).data('productcode'))
         $('#clientProductName').text($(this).data('productname'))

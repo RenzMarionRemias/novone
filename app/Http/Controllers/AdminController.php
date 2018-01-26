@@ -3,8 +3,9 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\User;
+use App\AccountType;
 use App\Log;
+use App\User;
 
 use Session;
 
@@ -35,21 +36,29 @@ class AdminController extends Controller
             return redirect()->back();
         }
 
-        $this->insertLogs($user->id);
         session(['currentUser' => $user]);
+
+        $this->insertLogs($user->id);
         
         return redirect('/admin/dashboard');
     }  
 
     public function showCreateUsers(){
-        return view('admin.partials.users.create_user');
+
+        $accountType = AccountType::all()->toArray();
+
+        return view('admin.partials.users.create_user',[
+            'accountType' => $accountType
+        ]);
     }
 
     public function showUsers(){
         $users = User::all()->toArray();
+        $accountType = AccountType::all()->toArray();
 
         return view('admin.partials.users.user_list', [
-            'users' => $users,
+            'accountType'   => $accountType,
+            'users'         => $users,
             'currentUserId' => session()->get('currentUser')->id
         ]);
     }
@@ -117,14 +126,13 @@ class AdminController extends Controller
 
         $user_log = new Log;
 
-        $user_log->user_id = $userId;
+        $user_log->user_id = session()->get('currentUser')->id;
 
         $user_log->save();
 
     }
 
     public function showChangePassword(){
-        dd(1);
         return view('admin.partials.users.update_user_password');
     }
 
