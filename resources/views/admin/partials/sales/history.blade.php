@@ -5,10 +5,13 @@
 
     <ul class="nav nav-tabs" style='margin-bottom:20px;'>
         <li class="active">
-            <a data-toggle="tab" href="#sales">Sales</a>
+            <a data-toggle="tab" href="#sales">Transaction History</a>
         </li>
         <li>
             <a data-toggle="tab" href="#pending">Pending Order</a>
+        </li>
+        <li>
+            <a data-toggle="tab" href="#installment">Installment Order</a>
         </li>
         <li>
             <a data-toggle="tab" href="#delivered">Delivery</a>
@@ -35,7 +38,13 @@
                     @foreach($invoices as $invoice)
                     <tr>
                         <td>{{$invoice->transaction_id}}</td>
-                        <td>{{$invoice->payment_type}}</td>
+                        <td>
+                        @if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
+                        {{$invoice->payment_type}}
+                        @endif
+                        </td>
                         <td>{{$invoice->delivery_status}}</td>
                         <td>{{$invoice->email}}</td>
                         <td>{{$invoice->invoice_total_amount}}</td>
@@ -81,7 +90,11 @@
                     @foreach($invoices as $invoice) @if($invoice->delivery_status == "PENDING")
                     <tr>
                         <td>{{$invoice->transaction_id}}</td>
-                        <td>{{$invoice->payment_type}}</td>
+                        <td>@if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
+                        {{$invoice->payment_type}}
+                        @endif</td>
                         <td>{{$invoice->delivery_status}}</td>
                         <td>{{$invoice->email}}</td>
                         <td>{{$invoice->invoice_total_amount}}</td>
@@ -111,6 +124,60 @@
                 </tbody>
             </table>
         </div>
+
+        <div id="installment" class="tab-pane fade in">
+        <table class="table list-data">
+                <thead>
+                    <tr>
+                        <th>Transaction ID</th>
+                        <th>Payment Type</th>
+                        <th>Delivery Status</th>
+                        <th>Client ID</th>
+                        <th>Total Amount</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($invoices as $invoice) 
+                    @if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                    <tr>
+                        <td>{{$invoice->transaction_id}}</td>
+                        <td>@if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
+                        {{$invoice->payment_type}}
+                        @endif</td>
+                        <td>{{$invoice->delivery_status}}</td>
+                        <td>{{$invoice->email}}</td>
+                        <td>{{$invoice->invoice_total_amount}}</td>
+                        <td>
+                            <a href="/novone/public/admin/invoice/{{$invoice->invoice_id}}" class="btn btn-primary btn-invoice-details" style="width:100%">View Order Details</a><br/>
+                            <a href="/novone/public/admin/invoice/payment/{{$invoice->invoice_id}}" class="btn btn-primary btn-invoice-details" style="width:100%">View Payment Schedule</a><br/>
+                            <div class="btn-group" role="group"  style="width:100%">
+                                    <button type="button" style="width:100%" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false">
+                                        Update Status
+                                        <span class="caret"></span>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a href="/novone/public/admin/transaction/update?id={{$invoice->invoice_id}}&action=SHIPPING">Shipping</a>
+                                        </li>
+                                        <li>
+                                            <a href="/novone/public/admin/transaction/update?id={{$invoice->invoice_id}}&action=DELIVERED">Delivered</a>
+                                        </li>
+                                        <li>
+                                            <a href="/novone/public/admin/transaction/update?id={{$invoice->invoice_id}}&action=CANCEL">Cancel</a>
+                                        </li>
+                                    </ul>
+                                </div>
+                        </td>
+                    </tr>
+                    @endif
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
         <div id="delivered" class="tab-pane fade in">
             <table class="table list-data">
                 <thead>
@@ -127,13 +194,18 @@
                     @foreach($invoices as $invoice) @if($invoice->delivery_status == "DELIVERED")
                     <tr>
                         <td>{{$invoice->transaction_id}}</td>
-                        <td>{{$invoice->payment_type}}</td>
+                        <td>@if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
+                        {{$invoice->payment_type}}
+                        @endif</td>
                         <td>{{$invoice->delivery_status}}</td>
                         <td>{{$invoice->email}}</td>
                         <td>{{$invoice->invoice_total_amount}}</td>
                         <td>
-                            <a href="/novone/public/admin/invoice/{{$invoice->invoice_id}}" class="btn btn-primary btn-invoice-details">View Order Details</a>
-                            <div class="btn-group" role="group">
+                            <a href="/novone/public/admin/invoice/{{$invoice->invoice_id}}" style="display:block;" class="btn btn-primary btn-invoice-details">View Order Details</a>
+                            <a href="/novone/public/download/order/{{$invoice->invoice_id}}"  style="display:block;" class="btn btn-primary pull-right">Download Receipt</a>
+                            <div class="btn-group" role="group"  style="display:block;">
                                     <button type="button" style="width:100%" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true"
                                         aria-expanded="false">
                                         Update Status
@@ -174,7 +246,11 @@
                     @foreach($invoices as $invoice) @if($invoice->delivery_status == "CANCEL")
                     <tr>
                         <td>{{$invoice->transaction_id}}</td>
-                        <td>{{$invoice->payment_type}}</td>
+                        <td>@if($invoice->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
+                        {{$invoice->payment_type}}
+                        @endif</td>
                         <td>{{$invoice->delivery_status}}</td>
                         <td>{{$invoice->email}}</td>
                         <td>{{$invoice->invoice_total_amount}}</td>

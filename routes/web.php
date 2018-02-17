@@ -18,6 +18,8 @@ Route::get('/', function () {
 //Renz's Routes
 Route::get('/', 'ClientController@showHomepage');
 Route::get('/login', 'ClientController@showLogin');
+Route::get('/forgotpassword', 'ClientController@showForgotPassword');
+Route::post('/forgotpassword', 'ClientController@forgotPasswordSubmit');
 Route::get('/signup', 'ClientController@showSignup');
 Route::post('/client/register', 'ClientController@clientSignup');
 Route::post('/client/profile', 'ClientController@showProfile');
@@ -25,6 +27,9 @@ Route::post('/client/signin', 'ClientController@clientSignin');
 Route::post('/client/approve/{id}', 'ClientController@clientApprove');
 Route::get('/client/logout', 'ClientController@logout');
 
+Route::get('/client/message','ClientController@showInbox');
+
+Route::get('/products', 		   'ProductController@displayProductList');
 
 Route::get('/products', 		   'ProductController@displayProductList');
 Route::get('/products/{category}', 'ProductController@filterByCategory');
@@ -43,7 +48,11 @@ Route::post('/cart/payment', 'CartController@proceedPayment');
 Route::get('/cart/payment/success','CartController@paymentSuccess');
 Route::get('/payment/add-funds/paypal/status', 'CartController@getPaymentStatus');
 
-Route::get('/order/details/{id}', 'CartController@getOrderDetails');
+Route::get('/order/details/{id}', 'CartController@showOrderDetails');
+Route::get('/cancelorder/{id}', 'CartController@cancelPendingOrder');
+
+
+Route::get('/announcement',   'AnnouncementController@showAnnouncementClient');
 //End
 
 
@@ -62,7 +71,8 @@ Route::get('/admin/user/list',      'AdminController@showUser');
 Route::get('/admin/logout',         'AdminController@logoutUser');
 Route::get('/admin/user/{status}/{id}', 'AdminController@updateUserStatus');
 
-Route::get('/admin/dashboard/user/update/password',      'AdminController@showChangePassword');
+Route::get('/admin/dashboard/user/update/information', 'AdminController@showAccountInformation');
+Route::post('/admin/user/update/information', 'AdminController@updateAccountInformation');
 Route::post('/admin/user/update/password',      'AdminController@saveNewPassword');
 
 // Clients 
@@ -72,6 +82,8 @@ Route::get('/admin/client/update/type/{id}','ClientController@changeAccountType'
 // Sales
 Route::get('/admin/invoice/list','CartController@showInvoice');
 Route::get('/admin/invoice/{id}','CartController@showInvoiceDetails');
+Route::get('/admin/invoice/payment/{id}','CartController@showPaymentSchedule');
+Route::get('/admin/invoicepaymentstatus/{id}','CartController@updatePaymentStatus');
 Route::get('/admin/transaction/update','CartController@updateTransaction');
 
 // Products
@@ -117,6 +129,17 @@ Route::get('/admin/measurement/{active}/{id}','MeasurementController@updateMeasu
 // LOGS
 Route::get('/admin/logs/user', 'LogsController@showUserLogs');
 
+// REPORTS
+Route::get('/admin/reports/sales','ReportController@showReports');
+
+Route::get('/admin/announcement',   'AnnouncementController@showAnnouncement');
+Route::post('/admin/announcement',   'AnnouncementController@submitAnnouncement');
+Route::get('/admin/announcement/list',   'AnnouncementController@showAnnouncementList');
+Route::get('/admin/announcement/update/{id}',   'AnnouncementController@updateAnnouncementStatus');
+
+
+// MESSAGES
+Route::get('/admin/messages/client','MessageController@showAdminMessageBoard');
 Route::get('/clear',function(){
 	Artisan::call('cache:clear');
 	dd('done!');
@@ -126,6 +149,12 @@ Route::get('/clear',function(){
 // PDF
 
 Route::get('/products/download/pdf','ProductController@downloadProductList');
+Route::get('/download/order/{orderid}','CartController@downloadOrderReceipt');
+
+
+
+Route::get('/admin/account/type/{accountid}','AccountController@showAccessRights');
+Route::post('/admin/account/type/{accountid}','AccountController@updateAccessRights');
 
 Route::get('/dump',function(){
 	Artisan::call('cache:clear');

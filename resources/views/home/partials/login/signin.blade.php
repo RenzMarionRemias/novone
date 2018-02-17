@@ -8,6 +8,12 @@
 		@foreach ($errors->all() as $error) * - {{ $error }} @endforeach
 	</div>
     @endif
+
+    @if(Session::has('loginFailed'))
+	<div class="alert alert-danger">
+    Login Failed!@php Session::forget('loginFailed'); @endphp
+	</div>
+    @endif
         <div class="panel panel-default">
               <div class="panel-heading">
                 <h3 class="panel-title">Please sign in</h3>
@@ -31,6 +37,7 @@
                     </div>
                     -->
                     <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
+                    <a href="/novone/public/forgotpassword" style="color:blue;margin-top:14px;margin-bottom:14px;text-align:center;">Forgot Password?</a>
                 </fieldset>
                   </form>
             </div>

@@ -60,11 +60,12 @@
 								<label>Contact No.</label>
 								<input type="text" required name="contact_no" class="form-control" id="" value="">
 							</div>
-
+<!--
 							<div class="form-group col-lg-12">
 								<label>Client Photo</label>
 								<input type="file" required name="client_photo" class="dropify" />
 							</div>
+-->
 						</div>
 
 						<div class="col-md-12">
@@ -85,11 +86,12 @@
 								<input type="text" required name="business_contact" class="form-control" id="" value="">
 							</div>
 
-							
+							<!--
 							<div class="form-group col-lg-12">
 								<label>Valid ID</label>
 								<input type="file" required name="client_valid_id" class="dropify" />
 							</div>
+-->
 
 
 						</div>

@@ -24,19 +24,29 @@
                                 </td>
                                 <td align="center" style="font-weight:bolder;">Total P {{$total}}</td>
                             </tr>
+                            
 -->
 
                     <div class="row">
                         <div class="col-xs-6">
                             <address>
-                                <strong>Ordered By:</strong>
-                                <br>
                                 <div>
-                                    Payment Type {{$products[0]->payment_type}}
+                                    <b>Payment Type</b> 
+                                    @if($products[0]->payment_type == "PAYPALINSTALLMENT")
+                                    INSTALLMENT
+                                    @else
+                                    {{$products[0]->payment_type}}
+                                    @endif
                                 </div>
                                 <div>
-                                    Amount Paid P {{$products[0]->invoice_payment}}
+                                    @if($products[0]->payment_type == "PAYPALINSTALLMENT")
+                                    <b> Initial Downpayment</b> P {{$products[0]->monthly_payment}}<br/>
+                                    <b> Monthly Payment</b> P {{$products[0]->monthly_payment}}
+                                    @else
+                                    <b> Amount Paid</b> P {{$products[0]->invoice_payment}}
+                                    @endif
                                 </div>
+
                             </address>
                         </div>
                         <div class="col-xs-6">
@@ -82,8 +92,48 @@
                                     <td class="text-center">{{$product->purchase_amount}}</td>
                                 </tr>
                                 @endforeach
+
+                                <tr>
+                                <td></td>
+                                <td></td>
+                               <!-- <td style="text-align:center;font-weight:bolder;">Total: {{$total}}</td>-->
+                                </tr>
                             </tbody>
                         </table>
+
+                            
+                    </div>
+                    <div class="table-responsive">
+                        
+                    @if(count($paymentDate))
+                    @if($products[0]->payment_type == 'PAYPALINSTALLMENT')
+                        <table class="table table-condensed" style="text-align:center;">
+                            <thead>
+                                <tr>
+                                    <td>
+                                        <strong>Payment Date</strong>
+                                    </td>
+                                    <td class="text-center">
+                                        <strong>Amount</strong>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($paymentDate as $pDate) 
+                                <tr>
+                                    <td>{{$pDate->payment_date}}</td>
+                                    <td>P {{$pDate->amount_paid}}</td>
+                                </tr>
+                            @endforeach
+                            <tr>
+                                <td></td>
+                                <td style="text-align:center;font-weight:bolder;">Total: {{$total}}</td>
+                            </tr>
+                            </tbody>
+                            </table>
+                    @endif
+                    @endif
+
                     </div>
                 </div>
             </div>

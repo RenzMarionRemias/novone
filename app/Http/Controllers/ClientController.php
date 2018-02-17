@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Http\Request;
 
 use App\Mail\AccountVerification;
+use App\Mail\ResetPassword;
 use App\Client;
 
 use DB;
@@ -34,6 +35,11 @@ class ClientController extends Controller {
         return view('admin.partials.clients.client_list', [
             'clients' => $clients
         ]);
+    }
+
+    public function showInbox(){
+
+        return view('home.partials.messages.inbox');
     }
 
     public function showUserInformation(){
@@ -150,7 +156,7 @@ class ClientController extends Controller {
             ->where('password','=',$request->password)->first();
         
             if(!$client){
-                return redirect()->back();
+                return redirect()->back()->with('loginFailed',true);
             }
 
             session(['currentClient' => $functions->prepareSessionObject($client,'CLIENT')]);
@@ -179,8 +185,8 @@ class ClientController extends Controller {
 
         $generatedPassword = $functions->generateRandomString(10);
 
-        $clientImage   = Storage::disk('local')->put('clients', $request->client_photo);
-        $clientValidId = Storage::disk('local')->put('client_requirements' , $request->client_valid_id);
+        //$clientImage   = Storage::disk('local')->put('clients', $request->client_photo);
+        //$clientValidId = Storage::disk('local')->put('client_requirements' , $request->client_valid_id);
         $client = new Client;
         
         $client->email            = $request->email;
@@ -223,20 +229,27 @@ class ClientController extends Controller {
                     'business_address'  => ucfirst($request->business_address),
                     'business_contact'  => $request->business_contact
         ]);
+
+        $this->updateSessionInformation($request);
         
 
         return redirect()->back()->with('success',true);
     }
 
     public function updateSessionInformation($user){
-
-        session()->get('currentClient')['lastname']         = $user->lastname;
-        session()->get('currentClient')['firstname']        = $user->firstname;
-        session()->get('currentClient')['middlename']       = $user->middlename;
-        session()->get('currentClient')['contact_no']       = $user->contact_no;
-        session()->get('currentClient')['business_name']    = $user->business_name;
-        session()->get('currentClient')['business_address'] = $user->business_address;
-        session()->get('currentClient')['business_contact'] = $user->business_address;
+        session(['currentClient' => [
+            'id' => session()->get('currentClient')['id'],  
+            'email' => session()->get('currentClient')['email'],
+            'birthdate' => $user->birthdate,
+            'gender' => $user->gender,
+            'lastname' => $user->lastname,
+            'firstname' => $user->firstname,
+            'middlename' => $user->middlename,
+            'contact_no' => $user->contact_no,
+            'business_name' => $user->business_name,
+            'business_address' => $user->business_address,
+            'business_contact' => $user->business_contact
+        ]]);
     }
 
     public function changeAccountType($id,Request $request){
@@ -253,6 +266,44 @@ class ClientController extends Controller {
             ]);
         
             return redirect()->back()->with('success',true);
+    }
+
+    public function getClientInformation($userId){
+        
+        $result =  DB::table('clients')
+                    ->where('clients.client_id',$userId)
+                    ->select('clients.*')
+                    ->get()
+                    ->toArray();
+
+        if($result){
+
+            return $result[0];
+        }
+
+        return null;
+    }
+
+    public function showForgotPassword() {
+        return view('home.partials.login.forgot_password');
+    }
+
+    public function forgotPasswordSubmit(Request $request) {
+
+        $user = DB ::table('clients')
+                    ->where('clients.email',$request->email)
+                    ->select('clients.email','clients.password')
+                    ->get()
+                    ->toArray();
+        
+        if($user) {
+            Mail::to($user[0]->email)->send(new ResetPassword($user[0]));
+            
+            return redirect()->back()->with('forgotPasswordSuccess',true);  
+        }
+
+        return redirect()->back()->with('accountNotExist',true);  
+
     }
 
 

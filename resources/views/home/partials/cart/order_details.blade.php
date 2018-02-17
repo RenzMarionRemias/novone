@@ -18,16 +18,20 @@
                 </div>
                 
                 <div class="col-xs-6 text-right">
-                       <address>
+                    <address>
                         <strong>Payment Method:</strong><br>
+                        @if($transaction->payment_type == 'PAYPALINSTALLMENT')
+                        INSTALLMENT
+                        @else
                         {{$transaction->payment_type}}
+                        @endif
                     </address>
                 </div>
                 
             </div>
             <div class="row">
                 <div class="col-xs-6">
-                 <address>
+                <address>
                         <strong>Delivery Status:</strong><br>
                         {{$transaction->delivery_status}}<br><br>
                     </address>
@@ -50,7 +54,7 @@
     			</div>
     			<div class="panel-body">
     				<div class="table-responsive">
-    					<table class="table table-condensed">
+    					<table class="table table-condensed" style="text-align:center;">
     						<thead>
                                 <tr>
         							<td><strong>Product Code</strong></td>
@@ -97,7 +101,36 @@
     							</tr>
     						</tbody>
     					</table>
+    				</div>  
+                    @if($transaction->payment_type == 'PAYPALINSTALLMENT')
+                    @if($paymentDate)
+                    <div class="panel-heading">
+    				    <h3 class="panel-title"><strong>Monthly Payment summary</strong></h3>
+    			    </div>
+    				<div class="table-responsive">
+    					<table class="table table-condensed" style="text-align:center;">
+    						<thead>
+                                <tr>
+        							<td><strong>Payment Date</strong></td>
+                                    <td><strong>Payment Status</strong></td>
+                                    <td><strong>Amount</strong></td>
+                                </tr>
+    						</thead>
+    						<tbody>
+    							<!-- foreach ($order->lineItems as $line) or some such thing here -->
+                                @foreach($paymentDate as $date)
+    							<tr>
+    								<td>{{$date->payment_date}}</td>
+                                    <td>{{$date->payment_status}}</td>
+    								<td class="text-center">{{$date->amount_paid}}</td>
+    							</tr>
+                                @endforeach
+                                
+    						</tbody>
+    					</table>
     				</div>
+                    @endif
+                    @endif
     			</div>
     		</div>
     	</div>

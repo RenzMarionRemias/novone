@@ -16,6 +16,7 @@
     <link href="/novone/public/assets/bootstrap/css/bootstrap.min.css" rel="stylesheet">
     <link href="/novone/public/assets/css/admin-sidebar.css" rel="stylesheet">
     <link href="/novone/public/plugins/datatables/datatables.min.css" rel="stylesheet" />
+    <link href="/novone/public/plugins/daterange/daterangepicker.css" rel="stylesheet" />
 
     <style>
         .nopadding {
@@ -157,6 +158,9 @@
             </div>
         </div>
     </nav>
+    @if(Session::get('currentUser'))
+    <input type="hidden" class="adminId" value="{{Session::get('currentUser')->id}}"/>
+    @endif
     <script src="/novone/public/js/app.js"></script>
 
 
@@ -369,8 +373,11 @@
     </script>
 
     <script src="/novone/public/plugins/datatables/datatables.min.js"></script>
+    <script src="/novone/public/plugins/daterange/moment.min.js"></script>
+    <script src="/novone/public/plugins/daterange/daterangepicker.js"></script>
     <script src="/novone/public/plugins/barcode/JsBarcode.all.min.js"></script>
     <script src="/novone/public/plugins/barcode/jquery.scannerdetection.js"></script>
+    
     <script>
         $(document).ready(function () {
             $('.list-data').DataTable({
@@ -433,6 +440,10 @@
             })
         });
     </script>
+    <script src="/novone/public/plugins/chart/chart.js"></script>
+    <script src="/novone/public/js/reports.js"></script>
+
+    <script src="/novone/public/js/admin_message.js"></script>
 
 </body>
 

@@ -49,6 +49,8 @@
     </div>
 </div>
 -->
+<input type="hidden" class="clientId" value="{{Session::get('currentClient')['id']}}"/>
+<script src="/novone/public/assets/jquery/jquery.min.js"></script>
 
 <script src="/novone/public/assets/animate-scroll/animatescroll.js"></script>
 <script src="/novone/public/assets/jquery-visible-master/jquery.visible.js"></script>
@@ -139,26 +141,49 @@
 
     $('#paymentMethod').on('change', function () {
         $('#paymentMethodLabel').text($(this).val());
+
+        if ($(this).val() == 'PAYPALINSTALLMENT') {
+            $('#installmentList').show()
+            $('#installmentMethod').attr('required', true)
+            $('#monthlyPayment').show()
+            computeTotalPrice()
+        }
+        else {
+            $('#installmentList').hide()
+            $('#monthlyPayment').hide()
+            $('#installmentMethod').removeAttr('required')
+        }
     });
 
-    function computeTotalPrice(){
-        var totalPrice = 0;
-        $('td.price-subtotal span').each(function(i, obj) {
+    function computeTotalPrice() {
+        var totalPrice = 0,
+            installmentPrice = 0;
+
+        $('td.price-subtotal span').each(function (i, obj) {
             totalPrice = totalPrice + parseInt($(obj).text())
         });
+
+        if ($('#paymentMethod').val() == 'PAYPALINSTALLMENT') {
+            installmentPrice = (totalPrice / parseInt($('#installmentMethod').val())).toFixed(2)
+            $('#hiddenMonthlyPrice').val(installmentPrice)
+            $('#monthlyTotalPrice').text(installmentPrice)
+        }
+        else {
+
+        }
         $('#orderTotalPrice span').text(totalPrice)
     }
 
 
     $('.cart-product-price').on('change', function () {
-       
+
         var nextElement = $(this).next();
         var productObject = JSON.parse($('#' + nextElement.attr('id') + 'Object').val());
         $('#' + nextElement.attr('id') + '-cell').text($(this).val());
         $('#' + nextElement.attr('id') + '-total-cell span').text($('#' + nextElement.attr('id')).val() * $(this).val());
         productObject.quantity = $(this).val();
         $('#' + nextElement.attr('id') + 'Object').val(JSON.stringify(productObject))
-        console.log($('#' + nextElement.attr('id') + 'Object').val());
+
         // -------------------------- //
         computeTotalPrice();
     });
@@ -166,11 +191,15 @@
 
     computeTotalPrice();
 
-
-
-
+    $('#paymentForm').on('submit',function(e){
+        var c = confirm('Are you sure?');
+    })
 
 </script>
+
+
+<script src="/novone/public/js/client_notification.js"></script>
+<script src="/novone/public/js/client_message.js"></script>
 </body>
 
 </html>

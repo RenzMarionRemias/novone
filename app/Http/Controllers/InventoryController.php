@@ -29,7 +29,7 @@ class InventoryController extends Controller {
 
     public function getProduct($productCode){
 
-         return DB::table('inventories')
+        return DB::table('inventories')
         ->leftJoin('products', 'inventories.product_code', '=', 'products.product_code')
         ->where('products.product_code',$productCode)
         ->select('inventories.*','products.pcs_per_bundle')
@@ -44,6 +44,10 @@ class InventoryController extends Controller {
         $request->validate([
             'quantity'      => 'required|numeric',
         ]);
+
+        if($request->manufactured_date > $request->expiration_date){
+            return redirect()->back()->with('dateError',true);
+        }
         
         $products = $this->getProduct($productCode);
 
@@ -54,7 +58,7 @@ class InventoryController extends Controller {
                         ->update(['quantity' => $request->quantity+$products->quantity
                     ]);
             
-                    $this->triggerPullIn($request->product_code,$request->quantity,$addType);
+                    $this->triggerPullIn($request,$addType);
                 }
                 else if($addType == 'STORE'){
                     if($request->quantity <= $products->quantity){
@@ -90,7 +94,7 @@ class InventoryController extends Controller {
                             ->update(['quantity' => $products->quantity -  $request->quantity
                         ]);
 
-                        $this->triggerPullIn($request->product_code,$request->quantity,$addType);
+                        $this->triggerPullIn($request,$addType);
                     }
                     else{
                         return redirect()->back()->with('quantityError',true);
@@ -112,7 +116,7 @@ class InventoryController extends Controller {
             
             $inventory->save();
 
-            $this->triggerPullIn($request->product_code,$request->quantity,'INVENTORY');
+            $this->triggerPullIn($request,'INVENTORY');
             
             return redirect()->back()->with('success',true);
         }
@@ -175,15 +179,19 @@ class InventoryController extends Controller {
     // PULL IN //
 
     
-    public function triggerPullIn($productCode,$quantity,$type){
-        
+    public function triggerPullIn($request,$type){
+
         $productPullIn = new ProductPullIn;
         
-        $productPullIn->product_code = $productCode;
+        $productPullIn->product_code = $request->product_code;
 
         $productPullIn->pull_in_type = $type;
         
-        $productPullIn->quantity = $quantity;
+        $productPullIn->quantity = $request->quantity;
+
+        $productPullIn->manufactured_date = $request->manufactured_date;
+
+        $productPullIn->expiration_date = $request->expiration_date;
 
         $productPullIn->user_id = session()->get('currentUser')->id;
         

@@ -3,10 +3,16 @@
 
 
 <div class='col-xs-12 col-sm-10 col-md-10 pull-right' style='padding-left:100px;'>
-
+    <h1>Inventory of Products</h1>
     @if(Session::has('success'))
     <div class="alert alert-success">
         Product has been updated successfully! @php Session::forget('success'); @endphp
+    </div>
+    @endif
+
+    @if(Session::has('dateError'))
+    <div class="alert alert-danger">
+        Expiration date must be ahead of Manufactured Date! @php Session::forget('dateError'); @endphp
     </div>
     @endif
 
@@ -151,6 +157,16 @@
                         <div class="form-group">
                             <label>Bundle</label>
                             <input type="text" class="form-control" required id='editProductQuantity' name="quantity">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Manufactured Date</label>
+                            <input type="date" class="form-control" required id='editProductManufacturedDate' name="manufactured_date">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Expiration Date</label>
+                            <input type="date" class="form-control" required id='editProductExpirationDate' name="expiration_date">
                         </div>
                     </div>
                     <div class="modal-footer">

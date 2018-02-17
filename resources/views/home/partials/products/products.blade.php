@@ -4,10 +4,11 @@
     <div class="menu">
         <div class="mini-menu">
             <ul>
+                <a href="/novone/public/products/" class="btn btn-primary" style="width:100%;margin-top:15px;">All</a>
                 @foreach($categories as $category)
-                <li class="sub">
-                    <a href="/novone/public/products/{{$category['id']}}">{{$category['name']}}</a>
-                    <!--
+
+                <a href="/novone/public/products/{{$category['id']}}" class="btn btn-primary" style="width:100%;margin-top:15px;">{{$category['name']}}</a>
+                <!--
                         <ul>
                             <li>
                                 <a href="#">Jackets</a>
@@ -17,7 +18,7 @@
                             </li>
                         </ul>
                     -->
-                </li>
+
                 @endforeach
 
             </ul>
@@ -62,12 +63,12 @@
 
         @if(Session::has('success'))
         <div class="alert alert-success">
-            Product has been added to cart successfully! 
+            Product has been added to cart successfully!
         </div>
         @endif
 
         <div class="items" style="background-color:white;">
-            @foreach($products as $product)
+            @if(count($products)) @foreach($products as $product)
             <div data-price="{{$product->price}}" class="item">
                 <img src="/novone/storage/app/{{$product->image}}" alt="jacket" class="img-item" style="object-fit: cover;" />
                 <div class="info" style="text-align:center;">
@@ -79,9 +80,13 @@
                         data-description="{{$product->description}}" data-productimage="/novone/storage/app/{{$product->image}}">View Details</a>
                 </div>
             </div>
-            @endforeach
+            @endforeach @else
+            <div class="col-xs-12 col-sm-12 col-md-12 alert alert-danger" style="text-align:center;">
+                <h2>No product found!</h2>
+            </div>
+            @endif
         </div>
-        
+
     </div>
 </div>
 

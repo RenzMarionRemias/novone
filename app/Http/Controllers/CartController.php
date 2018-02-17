@@ -8,6 +8,7 @@ use App\Cart;
 use App\Invoice;
 use App\InvoiceDetail;
 use App\Product;
+use App\TransactionInstallment;
 use App\User;
 
 
@@ -27,12 +28,16 @@ use PayPal\Auth\OAuthTokenCredential;
 use Carbon;
 use DB;
 use PayPal;
+use PDF;
 use Redirect;
 use Storage;
 use Session;
 
 use Srmklive\PayPal\Services\ExpressCheckout;
 use Srmklive\PayPal\Services\AdaptivePayments;
+
+use Ramsey\Uuid\Uuid;
+use Ramsey\Uuid\Exception\UnsatisfiedDependencyException;
 
 
 class CartController extends Controller {
@@ -59,6 +64,7 @@ class CartController extends Controller {
 
         $products = Cart::where('product_code','=',$request->product_code)
                     ->where('user_id','=',session()->get('currentClient')['id'])
+                    ->where('cart_status','=','PENDING')
                     ->first();
         if($products){
 
@@ -90,7 +96,7 @@ class CartController extends Controller {
 
     public function showCart(){
         
-        $currentDate = date("Y-m-d");
+        $currentDate = date('Y-m-d');
 
         $total = 0;
 
@@ -123,61 +129,106 @@ class CartController extends Controller {
 
     public function proceedPayment(Request $request){
 
+        $priceMinLimit = 10000;
+
         $data = [];
         
         $data['items'] = [];
         
-
         foreach($request->all()['product'] as $product){
             $p = json_decode($product);
 
             array_push($data['items'],[ 
                 'product_code' => $p->product_code,
-                'name'  => $p->product_name,
-                'price' => $p->price,
-                'qty'   => array_key_exists ('quantity',$p) ? $p->quantity : 1
+                'name'         => $p->product_name,
+                'price'        => $p->price,
+                'qty'          => array_key_exists ('quantity',$p) ? $p->quantity : 1
             ]);
         }
+        
+        $method = [
+            'payment_method' => $request->payment_method,
+            'monthly_price' => $request->monthly_price,
+            'installment_method' => $request->installment_method
+        ];
 
-
-
-        $data['invoice_description'] = "Novone Products";
-        $data['return_url'] = url('cart/payment/success');
-        $data['cancel_url'] = url('/cart/user');
-    
         $total = 0;
+        
         foreach($data['items'] as $item) {
             $total += $item['price'] * $item['qty'];
         }
-    
-        $data['total'] = $total;
 
-        $this->saveInvoice($data);
-
-        $this->saveInvoiceDetails($data,session()->get('currentInvoiceId'));
-        $invoiceInfo = Invoice::where('invoice_id',session()->get('currentInvoiceId'))->orderBy('invoice_id', 'desc')->first();
-        $this->updateCartStatus(session()->get('currentInvoiceId'));
+        if($total < $priceMinLimit) {
+            return redirect()->back()->with('priceMinLimit',true);
+        }
         
-        return $this->payment($data,$invoiceInfo);
+            
+        $data['total'] = $total;
+        
+        if($request->payment_method != 'CASH'){
+
+            $data['invoice_description'] = "Novone Products";
+            $data['return_url'] = url('cart/payment/success');
+            $data['cancel_url'] = url('/cart/user');
+            
+            
+            if($method['payment_method'] == 'PAYPALINSTALLMENT'){
+                $this->createMonthlyPayment(session()->get('currentInvoiceId'),$method);
+            }
+        }
+
+        $this->saveInvoice($data,$method);
+        $this->saveInvoiceDetails($data,session()->get('currentInvoiceId'));
+        
+        $invoiceInfo = Invoice::where('invoice_id',session()->get('currentInvoiceId'))->orderBy('invoice_id', 'desc')->first();
+        
+        if($request->payment_method != 'CASH'){
+            return $this->payment($data,$invoiceInfo);  
+        }
+
+        $this->updateCartStatus(session()->get('currentInvoiceId'));
+
+        return redirect()->back()->with('cashOrderSuccess',true);
     }
 
-    public function saveInvoice($data){
+    public function saveInvoice($data,$method){
 
         $invoice = new Invoice;
         
         $invoice->client_id = session()->get('currentClient')['id'];
 
+        if($method['payment_method'] == 'PAYPALINSTALLMENT') {
+            $invoice->no_of_months = $method['installment_method'];
+            $invoice->monthly_payment = $method['monthly_price'];
+        }
+        if($method['payment_method'] == 'CASH'){
+            $uuid1 = Uuid::uuid1();
+            $invoice->transaction_id = $uuid1->toString();
+        }
                     
         $invoice->invoice_total_amount = $data['total'];
 
         $invoice->invoice_payment = $data['total'];
         
-        $invoice->payment_type = 'CASH';
+        $invoice->payment_type = $method['payment_method'];
 
         $lastId = $invoice->save();
 
         Session::put('currentInvoiceId', $invoice->id);
- 
+    }
+
+    public function createMonthlyPayment ($invoiceId,$transaction) {
+        $data = array();
+        
+        for($ctr = 1;$ctr<=$transaction['installment_method'];$ctr++){
+            $paymentDate = date('Y/m/d', strtotime('+'.$ctr.' months'));
+            $data[$ctr-1] = [
+                'invoice_id'   => $invoiceId, 
+                'payment_date' => $paymentDate,
+                'amount_paid' =>  $transaction['monthly_price']
+            ];
+        }
+        TransactionInstallment::insert($data);
     }
 
     public function saveInvoiceDetails($data,$invoiceId){
@@ -204,6 +255,20 @@ class CartController extends Controller {
 
 
     // ADMIN
+    public function getTransaction($invoiceId){
+    
+        $result = DB::table('invoices')
+                    ->where('invoice_id',$invoiceId)
+                    ->get()
+                    ->toArray();
+
+        if(count($result) > 0 ){
+            return $result[0];
+        }
+
+        return null;
+    }
+    
 
     public function showInvoice(){
 
@@ -211,46 +276,131 @@ class CartController extends Controller {
                         ->leftJoin('clients', 'clients.client_id' ,'=','invoices.client_id')
                         ->get()
                         ->toArray();
-        return view('admin.partials.sales.history',['invoices'=>$invoices]);
+                        
+        return view('admin.partials.sales.history',[
+            'invoices'=>$invoices
+        ]);
     }
 
     public function showInvoiceDetails($invoiceId){
-        
-        
+
+        //{{date('d/m/Y', strtotime('+2 months'))}}
+        $paymentDate = [];
+
+        $invoices = $this->getTransaction($invoiceId);
+
+        if($invoices->payment_type == 'PAYPALINSTALLMENT') {
+            $paymentDate = $this->getPaymentDate($invoices->invoice_id);
+        }
+
         $invoiceDetail =  DB::table('invoice_details')
-                        ->leftJoin('invoices','invoices.invoice_id','=','invoice_details.invoice_id')
-                        ->leftJoin('clients','invoices.client_id','=','clients.client_id')
-                        ->where('invoice_details.invoice_id',$invoiceId)
-                        ->get()
-                        ->toArray();
-
+                                ->leftJoin('invoices','invoices.invoice_id','=','invoice_details.invoice_id')
+                                ->leftJoin('clients','invoices.client_id','=','clients.client_id')
+                                ->where('invoice_details.invoice_id',$invoiceId)
+                                ->get()
+                                ->toArray();
+        
         $clientInformation =  DB::table('clients')
-                        ->leftJoin('invoices','invoices.client_id','=','clients.client_id')
-                        ->where('invoices.invoice_id',$invoiceId)
-                        ->select('clients.*')
-                        ->get();
+                                ->leftJoin('invoices','invoices.client_id','=','clients.client_id')
+                                ->where('invoices.invoice_id',$invoiceId)
+                                ->select('clients.*')
+                                ->get();
 
-        $total = DB::table('invoice_details')
+        $total = DB::table('invoices')
                     ->where('invoice_id',$invoiceId)
-                ->sum('purchase_amount');
+                    ->sum('invoice_total_amount');
 
-        return view('admin.partials.sales.sales',['products'=>$invoiceDetail,'total'=>$total,'client'=>$clientInformation[0],]);
+        return view('admin.partials.sales.sales',[
+                    'products'=>$invoiceDetail,
+                    'total'=> (int)$total,
+                    'client'=>$clientInformation[0],
+                    'paymentDate' => $paymentDate
+        ]);
     }
+
+    public function showPaymentSchedule($id){
+  
+        $transaction = $this->getTransaction($id);
+
+        if($transaction->payment_type == 'PAYPALINSTALLMENT') {
+            $paymentDate = $this->getPaymentDate($transaction->invoice_id);
+            
+            return view('admin.partials.sales.payment',[
+                'transaction'=>$transaction,
+                'payments'=>$paymentDate,
+            ]);
+        }
+        return redirect()->back();
+    }
+
+    public function getOrderUser($id){
+        $result =  DB::table('invoices')
+                    ->where('invoices.invoice_id',$id)
+                    ->select('invoice_id','transaction_id','client_id')
+                    ->get();
+        if($result) {
+            return $result[0];
+        }
+        return null;
+    }
+
+
 
     public function updateTransaction(Request $request){
 
         $action = strtoupper($request->query('action'));
 
-        if($action != "PENDING" && $action != "SHIPPING" && $action != "DELIVERED" && $action != "CANCEL"){
+        $notification = new NotificationController;
+
+        $order = $this->getOrderUser($request->query('id'));
+        
+        if($action != 'PENDING' && $action != 'SHIPPING' && $action != 'DELIVERED' && $action != 'CANCEL'){
             return redirect()->back()->with('error',true);
         }
 
         Invoice::where('invoice_id', $request->query('id'))
                 ->update(['delivery_status' => $action]);
 
+        $message = 'Administrator set the status of your transaction id # '. $order->transaction_id .' to '. $action .'';
+
+        $notification->createNotification($order->client_id,'ADMIN','ORDER',$message);
+
         return redirect()->back()->with('success',true);
     }
 
+
+    public function updatePaymentStatus($id,Request $request){
+        
+            $status =  strtoupper($request->query('status'));
+        
+            if($status == 'NOTPAID' || $status == 'PAID'){
+                TransactionInstallment::where('installment_id', $request->query('id'))
+                    ->update(['payment_status' => $status]);
+                $this->checkInstallmentTransaction($id);
+                    return redirect()->back()->with('paid',true);
+            }
+                return redirect()->back()->with('paid',false);
+        
+    }
+
+    public function checkInstallmentTransaction($invoiceId){
+        
+        $result =  DB::table('transaction_installments')
+                    ->where('invoice_id',$invoiceId)
+                    ->count(DB::raw('DISTINCT payment_status'));
+        $paymentStatus = 'NOTPAID';
+
+            if($result == 1) {
+                $paymentStatus = 'PAID';
+
+            }
+
+            Invoice::where('invoice_id', $invoiceId)
+                    ->update(['payment_status' => $paymentStatus]);
+    
+
+    }
+    
     public function payment($data,$invoiceInfo){
 
         ini_set('max_execution_time', 10000);
@@ -315,9 +465,11 @@ class CartController extends Controller {
         }
         
         foreach ($payment->getLinks() as $link) {
-          if ($link->getRel() == 'approval_url') {
-            $redirect_url = $link->getHref();
-            break;
+            if ($link->getRel() == 'approval_url') {
+                
+                $this->updateCartStatus(session()->get('currentInvoiceId'));
+                $redirect_url = $link->getHref();
+                break;
             }
         }
 
@@ -331,6 +483,7 @@ class CartController extends Controller {
         
         Session::flash('alert', 'Unknown error occurred');
         Session::flash('alertClass', 'danger no-auto-close');
+
         return redirect('/cart/user');
     }
 
@@ -342,6 +495,7 @@ class CartController extends Controller {
         ->update([ 'carts.cart_status' => 'SOLD']);
 
     }
+
     public function getPaymentStatus(Request $request){
 
         ini_set('max_execution_time', 10000);
@@ -351,7 +505,7 @@ class CartController extends Controller {
         Session::forget('paypal_payment_id');
     
         if (empty($request->input('PayerID')) || empty($request->input('token'))) {
-            Session::flash('alert', 'Payment failed');
+
             Session::flash('alertClass', 'danger no-auto-close');
             return redirect('/cart/user');
         }
@@ -374,8 +528,8 @@ class CartController extends Controller {
             Session::flash('alert', 'Funds Loaded Successfully!');
             Session::flash('alertClass', 'success');
             return redirect('/cart/user');
-      }
-      
+        }
+    
         Session::flash('alert', 'Unexpected error occurred & payment has been failed.');
         Session::flash('alertClass', 'danger no-auto-close');
 
@@ -388,32 +542,85 @@ class CartController extends Controller {
     }
 
 
-    public function getOrderDetails($id){
+    public function showOrderDetails($id){
 
+        $order = $this->getOrderDetails($id,session()->get('currentClient')['id']);
+
+        $paymentDate = $this->getPaymentDate($id);
+
+        return view('home.partials.cart.order_details',[
+            'orderedProducts' => $order['orderedProducts'],
+            'paymentDate'     => $paymentDate,
+            'total'           => $order['total'],
+            'transaction'     => $order['transaction']
+        ]);     
+        
+    }
+
+    public function getOrderDetails($orderId,$clientId){
         $total = 0;
 
         $transaction = DB::table('invoices')
-                    ->where('invoices.client_id',session()->get('currentClient')['id'])
-                    ->get();
+                        ->where('invoices.client_id',session()->get('currentClient')['id'])
+                        ->where('invoices.invoice_id',$orderId)
+                        ->get();
 
         $orderedProducts = DB::table('invoice_details')
-            ->leftJoin('invoices', 'invoices.invoice_id' ,'=','invoice_details.invoice_id')
-            ->leftJoin('products', 'products.product_code','=','invoice_details.product_code')
-            ->where('invoice_details.invoice_id',$id)
-            ->where('invoices.client_id' ,session()->get('currentClient')['id'])
-            ->select('invoice_details.*','products.*')
-            ->get();
-
+                            ->join('invoices', 'invoices.invoice_id' ,'=','invoice_details.invoice_id')
+                            ->join('products', 'products.product_code','=','invoice_details.product_code')
+                            ->where('invoice_details.invoice_id',$orderId)
+                            ->where('invoices.client_id' ,$clientId)
+                            ->select('invoice_details.*','products.*')
+                            ->get();
+        
         foreach($orderedProducts as $product){
             $total = $total + ($product->purchase_quantity * $product->purchase_amount);
         }
 
-        return view('home.partials.cart.order_details',[
+        return [
+            'transaction' => $transaction[0],
             'orderedProducts' => $orderedProducts,
-            'total'           => $total,
-            'transaction'     => $transaction[0]
-        ]);     
-        
+            'total' => $total
+        ];
     }
+
+    public function getPaymentDate($invoiceId){
+
+        return  DB::table('transaction_installments')
+                ->leftJoin('invoices','invoices.invoice_id','transaction_installments.invoice_id')
+                ->where('invoices.invoice_id',$invoiceId)
+                ->select('transaction_installments.*','invoices.transaction_id')
+                ->get();
+    }
+
+
+    // PDF
+
+    public function downloadOrderReceipt($orderId,Request $request){
+
+        $order = $this->getOrderDetails($orderId,session()->get('currentClient')['id']);
+        $paymentDate = $this->getPaymentDate($orderId);
+        PDF::setOptions(['defaultFont' => 'sans-serif','isHtml5ParserEnabled' => true]);
+        
+        $pdf = PDF::loadView('pdf.order_receipt',  [
+            'transaction'      => $order['transaction'],
+            'orderedProducts'  => $order['orderedProducts'],
+            'paymentDate'      => $paymentDate,
+            'total'            => $order['total']
+        ]);
+        
+            
+        return $pdf->download('receipt.pdf');
+    }
+
+    public function cancelPendingOrder($orderId,Request $request){
+ 
+        Invoice::where('invoice_id', $orderId)
+        ->update(['delivery_status' => 'CANCEL']);
+
+        return redirect()->back()->with('cancelled',true);
+    }
+
+    
         
 }
