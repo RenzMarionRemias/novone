@@ -6,7 +6,7 @@ $('#adminMessageSubmit')
             adminId = $('.adminId').val();
 
         $.ajax({
-            url: '/novone/public/api/message/send',
+            url: '/public/api/message/send',
             type: 'POST',
             dataType: 'json',
             data: {
@@ -21,15 +21,13 @@ $('#adminMessageSubmit')
                 getMessages()
             }
         })
-
     })
-
 function getMessages() {
 
     var clientId = $('.currentClientId').val();
     $('#adminMessageThread').empty();
     $.ajax({
-        url: '/novone/public/api/message/get?userId=' + clientId,
+        url: '/public/api/message/get?userId=' + clientId,
         type: 'GET',
         dataType: 'json',
         success: function (data) {
