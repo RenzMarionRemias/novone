@@ -299,7 +299,7 @@ class ClientController extends Controller {
         if($user) {
             Mail::to($user[0]->email)->send(new ResetPassword($user[0]));
             
-            return redirect()->back()->with('forgotPasswordSuccess',true);  
+            return redirect()->back()->with('forgotPasswordSubmitSuccess',true);  
         }
 
         return redirect()->back()->with('accountNotExist',true);  
